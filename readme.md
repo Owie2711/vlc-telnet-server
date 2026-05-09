@@ -1,291 +1,69 @@
-# VLC Telnet Server for Debian/Ubuntu LXC
+# VLC Telnet Server Setup
 
-A lightweight VLC telnet server installer for Debian/Ubuntu LXC containers.
+Panduan ini menjelaskan cara mengatur VLC Media Player sebagai layanan latar belakang (headless) dengan antarmuka Telnet menggunakan Systemd di Linux. Ini sangat berguna jika Anda ingin mengontrol pemutaran audio/video dari jarak jauh melalui jaringan.
 
-This project automatically installs and configures:
+## 🛠️ Langkah 1: Buat File Service
 
-- VLC
-- ALSA audio
-- VLC telnet (RC) interface
-- Persistent systemd user service
-- Auto-start on boot
-- Audio verification
-- Service verification
-
-Designed for Home Assistant integrations using VLC telnet control.
-
----
-
-# Features
-
-- Non-root installation
-- Runs VLC as the current user
-- Automatic ALSA configuration
-- Automatic systemd user service
-- Persistent service after reboot/logout
-- Pre-install safety checks
-- Post-install verification
-- Clean uninstaller included
-
----
-
-# Requirements
-
-- Debian 11+ or Ubuntu 22.04+
-- LXC container or VM
-- User with sudo access
-- Audio device already passed through to the container
-- Internet connection
-
----
-
-# Repository
-
-GitHub Repository:
-
-https://github.com/Owie2711/vlc-telnet-server
-
----
-
-# Files
-
-| File | Description |
-|------|-------------|
-| `install-vlc-telnet.sh` | Install and configure VLC telnet server |
-| `uninstall-vlc-telnet.sh` | Remove VLC telnet server cleanly |
-
----
-
-# How It Works
-
-The installer performs the following steps:
-
-1. Verifies system compatibility
-2. Verifies sudo access
-3. Verifies no existing VLC telnet server is running
-4. Installs required packages:
-   - VLC
-   - ALSA utilities
-   - Netcat
-5. Verifies ALSA audio device access
-6. Creates VLC telnet configuration
-7. Creates a persistent systemd user service
-8. Enables `loginctl linger`
-9. Starts VLC telnet server
-10. Verifies:
-    - Service status
-    - Startup persistence
-    - Listening port
-    - Telnet responsiveness
-
----
-
-# Default Configuration
-
-| Setting | Value |
-|----------|------|
-| Port | `4212` |
-| Password | `1234` |
-| Interface | `0.0.0.0` |
-| Audio Output | ALSA |
-
----
-
-# Installation
-
-## Option 1 — Clone Repository
-
-Clone repository:
+Buka terminal dan jalankan perintah berikut untuk membuat file konfigurasi service baru:
 
 ```bash
-git clone https://github.com/Owie2711/vlc-telnet-server.git
+sudo nano /etc/systemd/system/vlc-telnet.service
 ```
 
-Enter directory:
+## 📝 Langkah 2: Masukkan Konfigurasi Service
+
+Salin (Copy) konfigurasi di bawah ini dan tempelkan (Paste) ke dalam editor `nano` yang baru saja Anda buka. 
+
+> **Catatan Penting:** Pastikan Anda mengubah `User=zowie` dengan username yang ada di sistem server Anda (misalnya: `pi`, `root`, atau `ubuntu`).
+
+```ini
+[Unit]
+Description=VLC Telnet Server Headless
+After=network.target
+
+[Service]
+# Ganti 'zowie' dengan user asli di sistem (misal: pi, ubuntu, atau root)
+User=zowie
+ExecStart=/usr/bin/cvlc -I telnet --telnet-host 0.0.0.0 --telnet-port 4212 --telnet-password 1234 --aout alsa --vout dummy
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Simpan file dan keluar dari editor (Tekan `Ctrl+O` -> `Enter` untuk menyimpan, lalu `Ctrl+X` untuk keluar).
+
+### ⚙️ Penjelasan Konfigurasi (Opsional):
+- `--telnet-host 0.0.0.0`: Mengizinkan akses dari semua IP di jaringan.
+- `--telnet-port 4212`: Port yang digunakan untuk koneksi telnet.
+- `--telnet-password 1234`: Password untuk login telnet (ubah angka `1234` dengan password Anda agar lebih aman).
+- `--aout alsa --vout dummy`: Memaksa VLC untuk berjalan tanpa antarmuka grafis (headless).
+
+## 🚀 Langkah 3: Terapkan dan Jalankan Service
+
+Setelah file dibuat, beritahu sistem untuk memuat ulang konfigurasi dan mulai jalankan layanannya. Salin dan jalankan perintah ini satu per satu:
 
 ```bash
-cd vlc-telnet-server
+sudo systemctl daemon-reload
+sudo systemctl enable vlc-telnet.service
+sudo systemctl start vlc-telnet.service
 ```
 
-Make installer executable:
+Untuk memastikan service sudah berjalan tanpa error, cek statusnya dengan perintah:
 
 ```bash
-chmod +x install-vlc-telnet.sh
+sudo systemctl status vlc-telnet.service
 ```
 
-Run installer:
+## 💻 Langkah 4: Cara Mengontrol VLC
+
+Sekarang Anda bisa mengakses antarmuka kontrol VLC dari komputer mana saja di jaringan yang sama. Buka Terminal atau Command Prompt dan jalankan:
 
 ```bash
-./install-vlc-telnet.sh
+telnet <IP_SERVER_ANDA> 4212
 ```
+*(Ganti `<IP_SERVER_ANDA>` dengan IP address mesin tempat VLC berjalan, contoh: `telnet 192.168.1.10 4212`)*
 
----
-
-## Option 2 — Direct Install from GitHub
-
-Run directly from GitHub:
-
-```bash
-bash <(curl -sSL https://raw.githubusercontent.com/Owie2711/vlc-telnet-server/main/install-vlc-telnet.sh)
-```
-
----
-
-# Important
-
-Do NOT run the installer as root.
-
-Correct:
-
-```bash
-./install-vlc-telnet.sh
-```
-
-Wrong:
-
-```bash
-sudo ./install-vlc-telnet.sh
-```
-
-The installer must run as a normal user with sudo privileges because it creates a persistent user-level systemd service.
-
----
-
-# Verify Installation
-
-Check service status:
-
-```bash
-systemctl --user status vlc-telnet
-```
-
-Verify listening port:
-
-```bash
-ss -tulpn | grep 4212
-```
-
-Test telnet connection:
-
-```bash
-telnet <LXC-IP> 4212
-```
-
----
-
-# Reboot Verification
-
-After installation, reboot the container:
-
-```bash
-sudo reboot
-```
-
-Without logging in, verify the service is listening:
-
-```bash
-ss -tulpn | grep 4212
-```
-
-If the port is listening immediately after boot, persistent user services are working correctly.
-
----
-
-# Home Assistant Example
-
-Example VLC telnet integration:
-
-```yaml
-media_player:
-  - platform: vlc_telnet
-    name: VLC
-    host: 192.168.1.10
-    port: 4212
-    password: 1234
-```
-
----
-
-# Uninstall
-
-## Local Uninstall
-
-Make executable:
-
-```bash
-chmod +x uninstall-vlc-telnet.sh
-```
-
-Run uninstaller:
-
-```bash
-./uninstall-vlc-telnet.sh
-```
-
----
-
-## Direct Uninstall from GitHub
-
-```bash
-bash <(curl -sSL https://raw.githubusercontent.com/Owie2711/vlc-telnet-server/main/uninstall-vlc-telnet.sh)
-```
-
----
-
-# What the Uninstaller Removes
-
-- VLC telnet systemd user service
-- VLC telnet configuration
-- Service startup persistence
-- Optional package removal:
-  - VLC
-  - ALSA utilities
-  - Netcat
-
----
-
-# Troubleshooting
-
-## No Audio Output
-
-Verify ALSA device detection:
-
-```bash
-aplay -l
-```
-
-If no sound card appears:
-- audio passthrough is not configured correctly
-- `/dev/snd` may not exist inside the container
-
----
-
-## Service Not Starting
-
-Check service logs:
-
-```bash
-journalctl --user -u vlc-telnet -n 100
-```
-
----
-
-## Port Already In Use
-
-Check conflicting process:
-
-```bash
-ss -tulpn | grep 4212
-```
-
----
-
-# Notes
-
-This project is optimized for:
-
-- Home Assistant
-- Debian/Ubuntu LXC containers
-- Simple internal network audio automation
-
-It is intentionally lightweight and minimal.
+Saat diminta password, ketikkan password yang telah diatur (default: `1234`) lalu tekan Enter.
+Ketik `help` untuk melihat daftar perintah yang tersedia.
