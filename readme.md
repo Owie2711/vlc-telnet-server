@@ -66,4 +66,4 @@ telnet <IP_SERVER_ANDA> 4212
 *(Ganti `<IP_SERVER_ANDA>` dengan IP address mesin tempat VLC berjalan, contoh: `telnet 192.168.1.10 4212`)*
 
 Saat diminta password, ketikkan password yang telah diatur (default: `1234`) lalu tekan Enter.
-Ketik `help` untuk melihat daftar perintah yang tersedia.
+Ketik `help` untuk melihat daftar perintah yang tersedia.
