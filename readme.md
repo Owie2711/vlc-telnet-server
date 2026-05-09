@@ -4,7 +4,15 @@ Panduan ini menjelaskan cara mengatur VLC Media Player sebagai layanan latar bel
 
 ## ⚡ Instalasi Cepat (Otomatis)
 
-Jika Anda ingin menghemat waktu, gunakan script installer otomatis yang sudah disediakan. Script ini akan mengecek kebutuhan (ALSA & VLC), meminta password telnet, dan membuat service secara otomatis menggunakan user Anda saat ini.
+### 1. Langsung dari GitHub (One-Liner)
+Gunakan perintah ini untuk menginstal secara instan tanpa perlu download/clone manual:
+
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Owie2711/vlc-telnet-server/main/install.sh)"
+```
+
+### 2. Dari File Lokal
+Jika Anda sudah meng-clone repositori ini, gunakan cara ini:
 
 ```bash
 chmod +x install.sh
