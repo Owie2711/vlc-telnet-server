@@ -2,6 +2,15 @@
 
 Panduan ini menjelaskan cara mengatur VLC Media Player sebagai layanan latar belakang (headless) dengan antarmuka Telnet menggunakan Systemd di Linux. Ini sangat berguna jika Anda ingin mengontrol pemutaran audio/video dari jarak jauh melalui jaringan.
 
+## ⚡ Instalasi Cepat (Otomatis)
+
+Jika Anda ingin menghemat waktu, gunakan script installer otomatis yang sudah disediakan. Script ini akan mengecek kebutuhan (ALSA & VLC), meminta password telnet, dan membuat service secara otomatis menggunakan user Anda saat ini.
+
+```bash
+chmod +x install.sh
+./install.sh
+```
+
 ---
 
 ## 🔊 Persiapan (Khusus Proxmox LXC): Passthrough Audio ke Debian
