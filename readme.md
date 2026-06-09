@@ -1,17 +1,18 @@
-# 🔊 Panduan Setup Multi-Speaker (VLC Telnet)
+# 🔊 Multi-Speaker Setup Guide (VLC Telnet)
 
-Dokumen ini menjelaskan cara menjalankan beberapa instance VLC Telnet Server secara bersamaan untuk mendukung sistem multi-speaker menggunakan `systemd`.
+This guide explains how to run multiple VLC Telnet Server instances simultaneously to support a multi-speaker setup using `systemd`.
 
 ---
 
-### 🚀 Langkah 1: Buat Service untuk Instance 1
-Buka editor (gunakan `sudo`):
+## 🚀 Step 1: Create the Service for Instance 1
+
+Open a text editor with root privileges:
 
 ```bash
 sudo nano /etc/systemd/system/vlc-telnet-1.service
 ```
 
-Salin dan tempel kode berikut:
+Copy and paste the following configuration:
 
 ```ini
 [Unit]
@@ -28,19 +29,21 @@ RestartSec=5
 [Install]
 WantedBy=multi-user.target
 ```
+
 > [!TIP]
-> Tekan `Ctrl+O`, `Enter`, lalu `Ctrl+X` untuk menyimpan dan keluar dari Nano.
+> Press `Ctrl + O`, then `Enter` to save the file, and `Ctrl + X` to exit Nano.
 
 ---
 
-### 🚀 Langkah 2: Buat Service untuk Instance 2
-Buka editor lagi untuk instance kedua:
+## 🚀 Step 2: Create the Service for Instance 2
+
+Create another service for the second instance:
 
 ```bash
 sudo nano /etc/systemd/system/vlc-telnet-2.service
 ```
 
-Salin dan tempel kode berikut (perhatikan perbedaan pada **port**):
+Copy and paste the following configuration. Notice that the **Telnet port** is different:
 
 ```ini
 [Unit]
@@ -60,53 +63,62 @@ WantedBy=multi-user.target
 
 ---
 
-### ⚙️ Langkah 3: Aktifkan dan Jalankan Service
-Setelah file service dibuat, kita perlu memberi tahu sistem untuk memuat ulang konfigurasi dan mengaktifkan autorun saat boot.
+## ⚙️ Step 3: Enable and Start the Services
 
-1. **Reload systemd daemon:**
-   ```bash
-   sudo systemctl daemon-reload
-   ```
+After creating the service files, reload the `systemd` configuration and enable the services to start automatically at boot.
 
-2. **Enable (agar otomatis jalan saat Linux nyala):**
-   ```bash
-   sudo systemctl enable vlc-telnet-1
-   sudo systemctl enable vlc-telnet-2
-   ```
+### 1. Reload the systemd daemon:
 
-3. **Start (jalankan sekarang):**
-   ```bash
-   sudo systemctl start vlc-telnet-1
-   sudo systemctl start vlc-telnet-2
-   ```
+```bash
+sudo systemctl daemon-reload
+```
+
+### 2. Enable the services:
+
+```bash
+sudo systemctl enable vlc-telnet-1
+sudo systemctl enable vlc-telnet-2
+```
+
+### 3. Start the services:
+
+```bash
+sudo systemctl start vlc-telnet-1
+sudo systemctl start vlc-telnet-2
+```
 
 ---
 
-### 📊 Langkah 4: Cara Cek Status
-Untuk memastikan kedua instance berjalan dengan benar, gunakan perintah:
+## 📊 Step 4: Check the Service Status
+
+To verify that both instances are running correctly, use:
 
 ```bash
 sudo systemctl status vlc-telnet-1 vlc-telnet-2
 ```
+
 > [!NOTE]
-> Jika status berwarna **hijau (active running)**, berarti konfigurasi berhasil.
+> If both services show **active (running)**, the setup was successful.
 
 ---
 
-### 🛠️ Perintah Penting Lainnya
+## 🛠️ Useful Commands
 
-| Perintah | Deskripsi |
-| :--- | :--- |
-| `sudo systemctl stop vlc-telnet-1` | Mematikan service sementara |
-| `sudo systemctl restart vlc-telnet-1` | Restart (jika ada perubahan konfigurasi) |
-| `journalctl -u vlc-telnet-1 -f` | Melihat log secara real-time (debugging) |
+| Command                               | Description                                     |
+| :------------------------------------ | :---------------------------------------------- |
+| `sudo systemctl stop vlc-telnet-1`    | Temporarily stop the service                    |
+| `sudo systemctl restart vlc-telnet-1` | Restart the service after configuration changes |
+| `journalctl -u vlc-telnet-1 -f`       | View real-time logs for troubleshooting         |
 
 ---
 
-### 💡 Tips Tambahan
+## 💡 Additional Tips
+
 > [!WARNING]
-> Karena menggunakan password `1234`, pastikan port `4212` dan `4213` pada firewall (misal: Proxmox/UFW) **tidak dibuka ke publik**. Cukup izinkan akses dari jaringan lokal saja demi keamanan.
+> This example uses the password `1234`. For security reasons, do **not** expose ports `4212` and `4213` to the public internet. Restrict access to your local network using a firewall such as UFW or Proxmox Firewall.
 
 ---
 
-**Selesai!** Coba reboot Linux Anda, dan kedua instance VLC harusnya langsung aktif secara otomatis tanpa perlu perintah manual lagi.
+## ✅ Done!
+
+Reboot your Linux system to verify that both VLC Telnet Server instances start automatically without any manual intervention.
