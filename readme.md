@@ -1,4 +1,60 @@
-# 🔊 Multi-Speaker Setup Guide (VLC Telnet)
+# VLC Telnet Server for Proxmox
+
+Turn your **Proxmox host** into a dedicated VLC Telnet audio server for **Home Assistant** and other automation platforms.
+
+---
+
+## 🎯 Why?
+
+Home Assistant OS (HAOS) running as a virtual machine on Proxmox may have issues with audio hardware passthrough or device compatibility. Instead of passing physical audio devices directly to HAOS, this project allows the Proxmox host to handle audio playback while Home Assistant simply sends playback commands over Telnet.
+
+This approach provides a simple and reliable solution for:
+
+* 🔊 Text-to-Speech (TTS)
+* 🚪 Doorbell announcements
+* 🚨 Alarm sounds
+* 🔔 Notifications
+* 🎵 Media playback
+* 🏠 Multi-room audio
+
+---
+
+## 📖 How It Works
+
+```text
+                   Telnet
++----------------+ -------> +----------------------+
+|                |          |                      |
+| Home Assistant |          | Proxmox Host        |
+|     (HAOS)     |          | VLC Telnet Server   |
+|                |          |                      |
++----------------+          +----------+-----------+
+                                       |
+                                       |
+                                       v
+                              +------------------+
+                              | Physical Speaker |
+                              | USB / HDMI / AUX |
+                              +------------------+
+```
+
+Home Assistant acts as the client and sends commands to the VLC Telnet Server running on the Proxmox host. VLC then plays audio through the host's connected audio device.
+
+---
+
+## ✨ Features
+
+* Lightweight VLC Telnet server
+* Designed for Proxmox environments
+* No audio passthrough required for HAOS
+* Supports multiple VLC instances
+* Ideal for Home Assistant automations
+* Automatic startup with systemd
+* Compatible with USB, HDMI, and onboard audio devices
+
+---
+
+# 🔊 Multi-Speaker Setup Guide
 
 This guide explains how to run multiple VLC Telnet Server instances simultaneously to support a multi-speaker setup using `systemd`.
 
@@ -6,13 +62,11 @@ This guide explains how to run multiple VLC Telnet Server instances simultaneous
 
 ## 🚀 Step 1: Create the Service for Instance 1
 
-Open a text editor with root privileges:
-
 ```bash
 sudo nano /etc/systemd/system/vlc-telnet-1.service
 ```
 
-Copy and paste the following configuration:
+Paste:
 
 ```ini
 [Unit]
@@ -31,19 +85,17 @@ WantedBy=multi-user.target
 ```
 
 > [!TIP]
-> Press `Ctrl + O`, then `Enter` to save the file, and `Ctrl + X` to exit Nano.
+> Press `Ctrl + O`, `Enter`, then `Ctrl + X`.
 
 ---
 
 ## 🚀 Step 2: Create the Service for Instance 2
 
-Create another service for the second instance:
-
 ```bash
 sudo nano /etc/systemd/system/vlc-telnet-2.service
 ```
 
-Copy and paste the following configuration. Notice that the **Telnet port** is different:
+Paste:
 
 ```ini
 [Unit]
@@ -65,22 +117,20 @@ WantedBy=multi-user.target
 
 ## ⚙️ Step 3: Enable and Start the Services
 
-After creating the service files, reload the `systemd` configuration and enable the services to start automatically at boot.
-
-### 1. Reload the systemd daemon:
+Reload systemd:
 
 ```bash
 sudo systemctl daemon-reload
 ```
 
-### 2. Enable the services:
+Enable auto start:
 
 ```bash
 sudo systemctl enable vlc-telnet-1
 sudo systemctl enable vlc-telnet-2
 ```
 
-### 3. Start the services:
+Start services:
 
 ```bash
 sudo systemctl start vlc-telnet-1
@@ -89,36 +139,80 @@ sudo systemctl start vlc-telnet-2
 
 ---
 
-## 📊 Step 4: Check the Service Status
+## 📊 Step 4: Verify
 
-To verify that both instances are running correctly, use:
+Check the service status:
 
 ```bash
 sudo systemctl status vlc-telnet-1 vlc-telnet-2
 ```
 
 > [!NOTE]
-> If both services show **active (running)**, the setup was successful.
+> If both services show **active (running)**, everything is working correctly.
 
 ---
 
-## 🛠️ Useful Commands
+## 🛠 Useful Commands
 
-| Command                               | Description                                     |
-| :------------------------------------ | :---------------------------------------------- |
-| `sudo systemctl stop vlc-telnet-1`    | Temporarily stop the service                    |
-| `sudo systemctl restart vlc-telnet-1` | Restart the service after configuration changes |
-| `journalctl -u vlc-telnet-1 -f`       | View real-time logs for troubleshooting         |
+| Command                               | Description           |
+| :------------------------------------ | :-------------------- |
+| `sudo systemctl stop vlc-telnet-1`    | Stop the service      |
+| `sudo systemctl restart vlc-telnet-1` | Restart after changes |
+| `journalctl -u vlc-telnet-1 -f`       | View real-time logs   |
 
 ---
 
-## 💡 Additional Tips
+## 🔀 Adding More Speakers
+
+You can create additional instances simply by:
+
+* Copying an existing service file.
+* Changing the Telnet port.
+* Starting the new service.
+
+Example:
+
+| Instance  | Port |
+| :-------- | :--- |
+| Speaker 1 | 4212 |
+| Speaker 2 | 4213 |
+| Speaker 3 | 4214 |
+| Speaker 4 | 4215 |
+
+Each instance can be controlled independently from Home Assistant.
+
+---
+
+## 🔐 Security
 
 > [!WARNING]
-> This example uses the password `1234`. For security reasons, do **not** expose ports `4212` and `4213` to the public internet. Restrict access to your local network using a firewall such as UFW or Proxmox Firewall.
+> Do not expose the Telnet ports to the public internet.
+
+Recommended:
+
+* ✅ Local network only
+* ✅ Protect with a firewall
+* ✅ Use a strong Telnet password
+
+---
+
+## 💡 Example Home Assistant Use Cases
+
+* TTS announcements
+* Doorbell notifications
+* Alarm sounds
+* Package delivery alerts
+* Multi-room audio
+* Automation notifications
 
 ---
 
 ## ✅ Done!
 
-Reboot your Linux system to verify that both VLC Telnet Server instances start automatically without any manual intervention.
+After rebooting your Proxmox host, all VLC Telnet Server instances will start automatically and be ready to accept connections from Home Assistant.
+
+---
+
+## 🚀 Project Goal
+
+The goal of this project is to provide a simple and reliable audio server for Home Assistant users running HAOS on Proxmox, eliminating the need for complicated audio passthrough while supporting scalable multi-speaker setups.
